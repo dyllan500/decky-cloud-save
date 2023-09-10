@@ -2,15 +2,15 @@ import { sleep } from "decky-frontend-lib";
 import { getServerApi, setAppState } from "./state";
 import { toastError } from "./utils";
 
-export async function syncNow(): Promise<void> {
+export async function syncNow(TO_Server: boolean): Promise<void> {
   const start = new Date();
 
   setAppState("syncing", "true");
-  await getServerApi().callPluginMethod("sync_now", {});
+  await getServerApi().callPluginMethod("sync_now", { TO_Server });
 
   let exitCode = 0;
   while (true) {
-    const status = await getServerApi().callPluginMethod<{}, number | undefined>("sync_now_probe", {});
+    const status = await getServerApi().callPluginMethod<{}, number | undefined>("sync_now_probe", { TO_Server });
 
     if (status.success && status.result != null) {
       exitCode = status.result;

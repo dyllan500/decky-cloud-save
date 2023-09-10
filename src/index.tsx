@@ -36,15 +36,22 @@ const Content: VFC<{}> = () => {
       <PanelSection title="Sync">
         <PanelSectionRow>
           <ToggleField
-            label="Sync after closing a game"
+            label="Sync TO Server after closing a game"
             checked={appState.sync_on_game_exit === "true"}
             onChange={(e) => setAppState("sync_on_game_exit", e ? "true" : "false", true)}
           />
         </PanelSectionRow>
 
         <PanelSectionRow>
-          <ButtonItem layout="below" disabled={appState.syncing === "true" || !hasProvider} onClick={() => syncNow()}>
-            <DeckyStoreButton icon={<FaSave className={appState.syncing === "true" ? "dcs-rotate" : ""} />}>Sync Now</DeckyStoreButton>
+          <ButtonItem layout="below" disabled={appState.syncing === "true" || !hasProvider} onClick={() => syncNow(true)}>
+            <DeckyStoreButton icon={<FaSave className={appState.syncing === "true" ? "dcs-rotate" : ""} />}>Sync TO Server</DeckyStoreButton>
+          </ButtonItem>
+          {hasProvider === false && <small>Cloud Storage Provider is not configured. Please configure it in 'Cloud Provider'.</small>}
+        </PanelSectionRow>
+
+        <PanelSectionRow>
+          <ButtonItem layout="below" disabled={appState.syncing === "true" || !hasProvider} onClick={() => syncNow(false)}>
+            <DeckyStoreButton icon={<FaSave className={appState.syncing === "true" ? "dcs-rotate" : ""} />}>Sync FROM Server</DeckyStoreButton>
           </ButtonItem>
           {hasProvider === false && <small>Cloud Storage Provider is not configured. Please configure it in 'Cloud Provider'.</small>}
         </PanelSectionRow>
@@ -103,7 +110,7 @@ export default definePlugin((serverApi: ServerAPI) => {
 
   const { unregister: removeGameExitListener } = SteamClient.GameSessions.RegisterForAppLifetimeNotifications((e: LifetimeNotification) => {
     if (!e.bRunning && appState.currentState.sync_on_game_exit === "true") {
-      syncNow();
+      syncNow(true);
     }
   });
 
